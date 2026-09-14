@@ -1,0 +1,15 @@
+# How this repository declares its gate to the publish skill.
+# The keys are documented in skills/publish/references/gate.md.
+version: 1
+
+review:
+  rules:
+    - README.md
+
+gate:
+  - name: test
+    run: npm test
+
+ci:
+  required: true
+  timeout: 10m

@@ -1,0 +1,27 @@
+{
+  "name": "publish",
+  "version": "0.1.0",
+  "description": "An agent skill that takes committed work through a gate - review, tests, lint, docs - then pushes, opens the pull request, waits for CI, and attests the commit it ran on.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LeTuR/publish.git"
+  },
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "node --test \"tests/*.test.mjs\""
+  },
+  "files": [
+    "skills"
+  ],
+  "keywords": [
+    "claude-code",
+    "agent-skill",
+    "skills",
+    "ci",
+    "attestation"
+  ]
+}
