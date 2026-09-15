@@ -11,6 +11,7 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     strategy:
       fail-fast: false
       matrix:
@@ -24,3 +25,23 @@ jobs:
       # is a test dependency rather than a convenience.
       - run: jq --version
       - run: npm test
+
+  # The one check main requires from this workflow, so renaming or extending the
+  # matrix never changes what is required. It needs every other job here, and
+  # tests/ci.test.mjs fails if one is left out. Nothing in this workflow is
+  # conditional, so a skipped job is treated as a failed one rather than as a
+  # pass nobody ran.
+  all-checks:
+    name: All Checks
+    if: always()
+    needs:
+      - test
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Verify every job succeeded
+        env:
+          NEEDS: ${{ toJSON(needs) }}
+        run: |
+          echo "$NEEDS" | jq -r 'to_entries[] | "\(.key): \(.value.result)"'
+          echo "$NEEDS" | jq -e 'all(.[]; .result == "success")' > /dev/null
