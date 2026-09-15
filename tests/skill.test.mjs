@@ -11,6 +11,9 @@ import { MARKER, ROOT, SKILL_DIR, SKILL_MD, fencedBlocks, frontmatter, read, shi
 const skill = read(SKILL_MD);
 const readme = read(path.join(ROOT, "README.md"));
 
+/** Where this skill lives. The install command and the package both point here. */
+const REPOSITORY = "https://github.com/Thurbeen/publish";
+
 test("the frontmatter is there and names the skill after its directory", () => {
   const fm = frontmatter(skill);
   assert.ok(fm, "SKILL.md has no frontmatter, so no agent will index it");
@@ -64,10 +67,15 @@ test("there is exactly one install command, and it installs this skill", () => {
   }
   assert.equal(installs.length, 1, `expected one install recipe, found ${installs.length}`);
   const { sh } = installs[0];
-  assert.match(sh, /npx skills@latest add https:\/\/github\.com\/\S+/, "install must be a one-liner with npx");
+  assert.ok(sh.includes(`npx skills@latest add ${REPOSITORY} `), `install must be a one-liner with npx, from ${REPOSITORY}`);
   assert.match(sh, /--skill publish\b/, "install must name the skill");
   assert.match(sh, /--agent \S+/, "install must name the agent");
   assert.match(sh, /--yes\b/, "install must not stop on a prompt an agent cannot answer");
+});
+
+test("the package names the repository the install command installs from", () => {
+  const { repository } = JSON.parse(read(path.join(ROOT, "package.json")));
+  assert.equal(repository.url, `git+${REPOSITORY}.git`);
 });
 
 /** The leading word of each shell statement, ignoring quoted continuations. */

@@ -17,7 +17,7 @@ by construction. That is what makes it proof rather than decoration.
 ## Install
 
 ```sh
-npx skills@latest add https://github.com/LeTuR/publish \
+npx skills@latest add https://github.com/Thurbeen/publish \
   --skill publish --agent claude-code --global --yes
 ```
 
@@ -42,13 +42,15 @@ a branch ends up with two.
 flowchart TD
     A["ship this"] --> B{"phase 0<br/>someone else's gate?"}
     B -->|yes| Z["hand over, stop"]
-    B -->|no| C["1 preflight<br/>branch, clean tree, base"]
+    B -->|no| C["1 preflight<br/>branch, clean tree, forge, base"]
     C --> D["2 rebase onto the base"]
     D --> E["3 review<br/>against this repo's rules"]
     E --> F{"findings?"}
     F -->|yes| G["fix"] --> E
     F -->|no| H["4 gate<br/>the declared steps, all of them"]
+    H -->|a step fails| G
     H --> D5["5 documentation<br/>what the change made stale"]
+    D5 -->|docs changed| H
     D5 --> I["6 commit the fixes"]
     I --> J["7 push"]
     J --> K["8 change request<br/>five headings + attestation for this head"]
@@ -209,13 +211,13 @@ writes, is in
 ## Layout
 
 ```
-skills/publish/SKILL.md                   the skill an agent loads
-skills/publish/references/gate.md         how a repository declares its gate
-skills/publish/references/review.md       the review method — the product
-skills/publish/references/attestation.md  the marker, the fields, staleness
-skills/publish/references/forge.md        the four forge operations, per adapter
-skills/publish/templates/change-request-body.md   the five-heading body to fill in
-skills/publish/templates/attestation.md   the block that goes under ## Attestation
+skills/publish/SKILL.md                          the skill an agent loads
+skills/publish/references/gate.md                how a repository declares its gate
+skills/publish/references/review.md              the review method — the product
+skills/publish/references/attestation.md         the marker, the fields, staleness
+skills/publish/references/forge.md               the four forge operations, per adapter
+skills/publish/templates/change-request-body.md  the five-heading body to fill in
+skills/publish/templates/attestation.md          the block that goes under ## Attestation
 ```
 
 `npx skills add` copies `skills/publish/` and nothing else, so everything the
@@ -238,7 +240,7 @@ that rot, and the two properties everything else depends on:
 | A skipped step and a red pipeline cannot be reported as success, and no test in this suite opts out of running | `tests/no-silent-skip.test.mjs` |
 | Every link resolves inside the installed copy, and nothing shipped is unreachable | `tests/skill-self-contained.test.mjs` |
 | The documented declaration examples use the documented keys, a step's `instructions` are text or absent, and an undeclared gate blocks | `tests/gate.test.mjs` |
-| The frontmatter, the phases in order with documentation between the gate and the commit, the install command, and that every forge adapter gives all four operations | `tests/skill.test.mjs` |
+| The frontmatter, the phases in order with documentation between the gate and the commit, the install command and the repository it installs from, that the README and the skill agree on the marker and the declaration keys, and that every forge adapter gives all four operations | `tests/skill.test.mjs` |
 | The body has exactly its five headings, and the attestation sits under the last | `tests/change-request-body.test.mjs` |
 
 ## License
