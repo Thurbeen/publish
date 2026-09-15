@@ -7,7 +7,7 @@ const PATTERN = new RegExp(`^(${TYPES.join("|")})(\\([\\w./-]+\\))?!?: \\S.*$`);
 
 const title = process.argv[2] ?? "";
 
-if (PATTERN.test(title) && !/[\r\n]/.test(title)) {
+if (PATTERN.test(title)) {
   console.log(`PR title is a conventional commit: ${title}`);
 } else {
   console.error(

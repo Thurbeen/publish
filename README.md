@@ -250,8 +250,8 @@ that rot, and the two properties everything else depends on:
 | The body has exactly its five headings, and the attestation sits under the last | `tests/change-request-body.test.mjs` |
 | `All Checks` needs every other CI job and passes only when each succeeded, and `PR Title` accepts conventional commits and nothing else | `tests/ci.test.mjs` |
 
-Pull requests into `main` must pass two checks, named so they stay stable when
-jobs change:
+CI reports two checks that stand for all of it, named so that branch protection
+on `main` can require them without changing whenever a job does:
 
 - **`All Checks`**, the last job in `.github/workflows/ci.yml`. It needs every
   other job there, and fails if any of them failed, was cancelled or was
