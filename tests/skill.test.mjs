@@ -69,7 +69,15 @@ test("there is exactly one install command, and it installs this skill", () => {
   const { sh } = installs[0];
   assert.ok(sh.includes(`npx skills@latest add ${REPOSITORY} `), `install must be a one-liner with npx, from ${REPOSITORY}`);
   assert.match(sh, /--skill publish\b/, "install must name the skill");
-  assert.match(sh, /--agent \S+/, "install must name the agent");
+  // `universal` is the agent whose directory is .agents/skills, where the one
+  // real copy lives. Every other agent named gets a symlink to it. With --yes
+  // and a single target, the CLI copies instead, so a second agent is required.
+  assert.match(
+    sh,
+    /--agent universal [a-z][\w-]*/,
+    "install must put the skill in .agents/skills and symlink at least one agent to it",
+  );
+  assert.doesNotMatch(sh, /--copy\b/, "install must symlink agents to .agents/skills, not copy per agent");
   assert.match(sh, /--yes\b/, "install must not stop on a prompt an agent cannot answer");
 });
 
