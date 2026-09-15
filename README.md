@@ -1,8 +1,9 @@
 # publish
 
 An agent skill that takes committed work through a gate — adversarial review,
-then whatever tests, lint and docs commands the repository declares for itself —
-and only then pushes, opens the change request, and waits for CI to go green.
+then whatever tests, lint and docs commands the repository declares for itself,
+then the documentation the change made stale — and only then pushes, opens the
+change request, and waits for CI to go green.
 
 A change request is a pull request on GitHub and a merge request on GitLab. The
 gate is the same either way: only three phases touch the forge, through four
@@ -47,13 +48,18 @@ flowchart TD
     E --> F{"findings?"}
     F -->|yes| G["fix"] --> E
     F -->|no| H["4 gate<br/>the declared steps, all of them"]
-    H --> I["5 commit the fixes"]
-    I --> J["6 push"]
-    J --> K["7 change request<br/>body + attestation for this head"]
-    K --> L["8 watch CI"]
+    H --> D5["5 documentation<br/>what the change made stale"]
+    D5 --> I["6 commit the fixes"]
+    I --> J["7 push"]
+    J --> K["8 change request<br/>five headings + attestation for this head"]
+    K --> L["9 watch CI"]
     L -->|red| G
     L -->|green| M["done"]
 ```
+
+The change request body has five headings, in this order: `## Intent`,
+`## What Changed`, `## Risk Assessment`, `## Testing` and `## Attestation`. The
+attestation block sits under the last one, and nothing follows it.
 
 Every phase reports one of four statuses — `passed`, `failed`, `skipped`,
 `not-applicable` — and the verdict is `passed` only when every step is `passed`
@@ -95,6 +101,7 @@ machine-readable.
     { "name": "review", "status": "passed", "rounds": 3, "findings": 7, "fixed": 7 },
     { "name": "lint", "status": "passed", "command": "just lint" },
     { "name": "test", "status": "passed", "command": "cargo nextest run --all" },
+    { "name": "documentation", "status": "passed" },
     { "name": "ci", "status": "passed", "conclusion": "success",
       "run_url": "<the pipeline run this verdict is about>" }
   ],
@@ -167,6 +174,7 @@ gate:
     run:
       - cargo nextest run --all
       - cargo test --doc
+    instructions: "The sqlite tests share one port, so a bind failure means an earlier run is still up. Stop it and re-run."
 
 ci:
   required: true
@@ -183,6 +191,7 @@ ci:
 | `gate[].name` | yes | The step's name in the attestation. Free text. |
 | `gate[].run` | yes | One command, or a list run in order, from the repository root. |
 | `gate[].fix` | no | Applies the mechanical fixes, once, before a re-run. |
+| `gate[].instructions` | no | Text handed, as written, to whoever runs, reads or fixes the step. Anything but text is a broken declaration. |
 | `ci.required` | no | Default `true`. `false` declares the repository has no CI. |
 | `ci.timeout` | no | Default `30m`. |
 
@@ -205,8 +214,8 @@ skills/publish/references/gate.md         how a repository declares its gate
 skills/publish/references/review.md       the review method — the product
 skills/publish/references/attestation.md  the marker, the fields, staleness
 skills/publish/references/forge.md        the four forge operations, per adapter
-skills/publish/templates/change-request-body.md   the body to fill in
-skills/publish/templates/attestation.md   the block to fill in and append
+skills/publish/templates/change-request-body.md   the five-heading body to fill in
+skills/publish/templates/attestation.md   the block that goes under ## Attestation
 ```
 
 `npx skills add` copies `skills/publish/` and nothing else, so everything the
@@ -228,8 +237,9 @@ that rot, and the two properties everything else depends on:
 | An attestation for an earlier head does not authorise the current one — run through the documented `jq` command itself | `tests/attestation.test.mjs` |
 | A skipped step and a red pipeline cannot be reported as success, and no test in this suite opts out of running | `tests/no-silent-skip.test.mjs` |
 | Every link resolves inside the installed copy, and nothing shipped is unreachable | `tests/skill-self-contained.test.mjs` |
-| The documented declaration examples use the documented keys, and an undeclared gate blocks | `tests/gate.test.mjs` |
-| The frontmatter, the install command, and that every forge adapter gives all four operations | `tests/skill.test.mjs` |
+| The documented declaration examples use the documented keys, a step's `instructions` are text or absent, and an undeclared gate blocks | `tests/gate.test.mjs` |
+| The frontmatter, the phases in order with documentation between the gate and the commit, the install command, and that every forge adapter gives all four operations | `tests/skill.test.mjs` |
+| The body has exactly its five headings, and the attestation sits under the last | `tests/change-request-body.test.mjs` |
 
 ## License
 

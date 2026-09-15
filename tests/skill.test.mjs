@@ -38,7 +38,20 @@ test("the body keeps the promises the description makes", () => {
     assert.ok(skill.toLowerCase().includes(phase), `the body omits ${phase}`);
   }
   const phases = [...skill.matchAll(/^## Phase (\d) - /gm)].map((m) => Number(m[1]));
-  assert.deepEqual(phases, [0, 1, 2, 3, 4, 5, 6, 7, 8], "the phases are not numbered in order");
+  assert.deepEqual(phases, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "the phases are not numbered in order");
+});
+
+test("documentation is its own phase, between the gate and the commit", () => {
+  const names = [...skill.matchAll(/^## Phase \d - (.+)$/gm)].map((m) => m[1]);
+  assert.deepEqual(names.slice(4, 7), ["gate", "documentation", "commit"]);
+  const docs = /## Phase 5 - documentation\n([\s\S]*?)\n## /.exec(skill);
+  assert.ok(docs, "there is no documentation phase");
+  for (const kind of ["README", "reference", "changelog", "comment"]) {
+    assert.ok(docs[1].includes(kind), `the documentation phase never mentions ${kind}`);
+  }
+  assert.match(docs[1], /git commit -m "docs: /, "the documentation phase must commit what it changed");
+  assert.match(docs[1], /`documentation` step/, "the documentation phase must say what it records");
+  assert.match(docs[1], /phase 4/, "a doc the gate checks must go back through the gate");
 });
 
 test("there is exactly one install command, and it installs this skill", () => {

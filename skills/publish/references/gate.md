@@ -28,6 +28,7 @@ gate:
     run:
       - cargo nextest run --all
       - cargo test --doc
+    instructions: "The sqlite tests share one port, so a bind failure means an earlier run is still up. Stop it and re-run; do not mark the test flaky."
   - name: docs
     run: ./scripts/check-docs.sh
 
@@ -48,6 +49,7 @@ ci:
 | `gate[].name` | yes | The step's name in the attestation. Free text; `test`, `lint` and `docs` are the conventional ones, and a repository whose whole gate is one script is free to call it `check`. |
 | `gate[].run` | yes | One shell command, or a list run in order. Run from the repository root. |
 | `gate[].fix` | no | A command that applies the mechanical fixes this step can apply. Run once on failure, before re-running `run`. |
+| `gate[].instructions` | no | Text: the repository's own notes on this step. The skill hands it, as written, to whoever runs the step, reads its failure or fixes it. Absent: the step is handled with no notes. |
 | `ci.required` | no | Default `true`. `false` declares that this repository genuinely has no continuous integration. |
 | `ci.timeout` | no | Default `30m`. How long to wait before calling the pipeline `skipped` rather than green. |
 
@@ -136,10 +138,15 @@ published, and do not install one to read six keys.
 test -f .publish.yaml && cat .publish.yaml
 ```
 
-Two things to check as you read, because both are silent failures otherwise:
+Three things to check as you read, because each is a silent failure otherwise:
 
 - `version` is `1`. Anything else: treat the repository as undeclared and fall
   back, saying so.
 - Every `gate[]` entry has a `name` and a `run`. An entry missing either is a
   broken declaration - report it as a `skipped` step naming the entry, and do
   not guess what was meant.
+- `instructions`, when it is there, is text. A number, a list, a map or an
+  empty value is a broken declaration too - report it the same way, rather
+  than turning it into something to follow.
+
+`review` and `ci` are not `gate[]` entries and take no `instructions`.

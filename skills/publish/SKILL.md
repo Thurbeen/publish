@@ -1,6 +1,6 @@
 ---
 name: publish
-description: Take committed work through a gate and publish it - rebase, adversarial review against the repository's own rules, then whatever gate that repository declares (tests, lint, docs), then commit the fixes, push, open the change request, watch CI, and write an attestation naming the commit it ran on. Works on any forge with an adapter - GitHub and GitLab ship with it. Load this whenever someone asks to push, publish, ship, land, open a PR or MR, or get a branch merged, and whenever a task says to publish its own work. Do not load it when the repository ships its own publish, ship or release skill - that one wins.
+description: Take committed work through a gate and publish it - rebase, adversarial review against the repository's own rules, then whatever gate that repository declares (tests, lint, docs), then bring the documentation the change made stale up to date, then commit the fixes, push, open the change request, watch CI, and write an attestation naming the commit it ran on. Works on any forge with an adapter - GitHub and GitLab ship with it. Load this whenever someone asks to push, publish, ship, land, open a PR or MR, or get a branch merged, and whenever a task says to publish its own work. Do not load it when the repository ships its own publish, ship or release skill - that one wins.
 license: MIT
 ---
 
@@ -19,7 +19,7 @@ field by hand or edit it afterwards - see
 [`references/attestation.md`](references/attestation.md).
 
 A change request is a pull request on GitHub and a merge request on GitLab. The
-gate is the same either way; only phases 1, 7 and 8 touch the forge, and they go
+gate is the same either way; only phases 1, 8 and 9 touch the forge, and they go
 through the adapter table in [`references/forge.md`](references/forge.md).
 
 ```
@@ -35,16 +35,17 @@ through the adapter table in [`references/forge.md`](references/forge.md).
       └─ fixes ──┘  iterate until a round finds nothing
       │
   4 gate            exactly the steps the repository declares
-  5 commit          the fixes review and the gate produced
-  6 push
-  7 change request  body + attestation for the pushed head
-  8 CI              watch it; a red pipeline is not done
+  5 documentation   what the change made stale, committed on its own
+  6 commit          the fixes review and the gate produced
+  7 push
+  8 change request  five headings, the attestation for the pushed head last
+  9 CI              watch it; a red pipeline is not done
       │
       ▼
   green, and the attestation names the head that is green
 ```
 
-Every phase below reports one of four statuses, and phase 8 turns them into a
+Every phase below reports one of four statuses, and phase 9 turns them into a
 verdict. There is no fifth status and no way to leave a phase unreported:
 `passed`, `failed`, `skipped`, `not-applicable`.
 
@@ -95,9 +96,9 @@ git remote get-url origin                # which forge this is
   somewhere else entirely.
 - **The forge** comes from `forge:` in the gate declaration, or from the origin
   host. Read [`references/forge.md`](references/forge.md) now and pick the
-  adapter: it is the four operations phases 1, 7 and 8 need, one command each.
+  adapter: it is the four operations phases 1, 8 and 9 need, one command each.
   **Check the forge CLI is authenticated here, before phase 2** - an
-  authentication failure discovered at phase 7 is one discovered after the push.
+  authentication failure discovered at phase 8 is one discovered after the push.
   A forge with no adapter is a stop, not an improvisation: `git push` and a link
   to a web form is not a change request this skill opened, and nothing
   downstream can verify a body nobody wrote.
@@ -161,6 +162,12 @@ suggests one, and do not drop a step because it looks redundant - a gate the
 repository declared and this skill quietly skipped is the failure this design
 exists to prevent.
 
+A step may carry `instructions`: the repository's own notes on that step, as
+text. Read them before you run it, and keep them in front of you whenever you
+handle it - running it, reading its failure, fixing it. If you hand any of that
+to another agent, hand the instructions over with it, as written. A step with
+none runs exactly as below.
+
 For each step:
 
 - **It passes.** Record `passed` with the command.
@@ -176,7 +183,36 @@ For each step:
 Never edit the declaration to make a step pass. If a declared command is wrong,
 that is a finding to report, not a file to change on the way past.
 
-## Phase 5 - commit
+## Phase 5 - documentation
+
+The review flags a doc the diff made untrue. This phase is where the
+documentation catches up with the change. Walk what the change touches and
+update whatever it made stale:
+
+- the README, and any usage or help text,
+- reference docs and their examples, including an example that no longer runs,
+- the changelog, if the repository keeps one, in its own format,
+- comments beside changed code that describe behaviour that is gone.
+
+Only what this change made stale. A doc that was already wrong before this
+branch is a finding to report, not a rewrite to slip in.
+
+If anything changed, run phase 4's steps again - a repository that checks its
+docs has just had them change under its tests. Then commit the documentation on
+its own, staging only the files this phase touched; a file the review or the
+gate also changed goes into phase 6's commit instead.
+
+```sh
+git add <the files this phase changed>
+git commit -m "docs: <what the change made stale>"
+```
+
+Record a `documentation` step: `passed` when it ran, whether it updated
+something or found nothing stale; `failed` with the reason when a stale doc
+could not be brought in line; `skipped` with the reason when it could not run.
+Nothing changed: no commit, and the step is still `passed`.
+
+## Phase 6 - commit
 
 Commit what phases 3 and 4 changed, separately from the work being published, so
 a reviewer can read the original change without the gate's corrections mixed
@@ -190,7 +226,7 @@ git commit -m "fix: <what the review or the gate found>"
 
 Nothing changed: no commit. An empty commit is a lie about what the gate did.
 
-## Phase 6 - push
+## Phase 7 - push
 
 ```sh
 git push --force-with-lease origin HEAD
@@ -207,16 +243,18 @@ attestation.**
 git rev-parse HEAD
 ```
 
-## Phase 7 - change request
+## Phase 8 - change request
 
 Start from
 [`templates/change-request-body.md`](templates/change-request-body.md), fill it
 in, and delete every instruction comment as you answer it. What ships must read
-as prose a teammate wrote.
+as prose a teammate wrote, under exactly its five headings: `## Intent`,
+`## What Changed`, `## Risk Assessment`, `## Testing`, `## Attestation`.
 
-Append the attestation block from
-[`templates/attestation.md`](templates/attestation.md), filled from what each
-phase recorded and from the `git rev-parse HEAD` of phase 6.
+Put the attestation block from
+[`templates/attestation.md`](templates/attestation.md) under `## Attestation`,
+last, filled from what each phase recorded and from the `git rev-parse HEAD` of
+phase 7.
 [`references/attestation.md`](references/attestation.md) has the field contract.
 
 Open it with operation 2 from your adapter, or update the one that is already
@@ -226,7 +264,7 @@ The remote may squash-merge, in which case the title becomes the commit on the
 base branch. Write it as that commit message: conventional-commit prefix,
 imperative, no trailing period.
 
-## Phase 8 - CI
+## Phase 9 - CI
 
 Watch the pipeline with operation 4 from your adapter, and read a failing job
 with the log command beside it. Wait for it. This is the phase with the only
@@ -261,5 +299,5 @@ Before you report `passed`, check the attestation still names the head. The
 verification command for your forge is in
 [`references/forge.md`](references/forge.md), beside that adapter's operations;
 it answers `current`, `stale` or `no attestation`, and only `current` lets you
-report done. Anything else means go back to phase 7 and rewrite the body for the
-real head.
+report done. Anything else means go back to phase 8 and rewrite the body for the
+real head, the block under `## Attestation` included.
