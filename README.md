@@ -248,6 +248,19 @@ that rot, and the two properties everything else depends on:
 | The documented declaration examples use the documented keys, a step's `instructions` are text or absent, and an undeclared gate blocks | `tests/gate.test.mjs` |
 | The frontmatter, the phases in order with documentation between the gate and the commit, the install command and the repository it installs from, that the README and the skill agree on the marker and the declaration keys, and that every forge adapter gives all four operations | `tests/skill.test.mjs` |
 | The body has exactly its five headings, and the attestation sits under the last | `tests/change-request-body.test.mjs` |
+| `All Checks` needs every other CI job and passes only when each succeeded, and `PR Title` accepts conventional commits and nothing else | `tests/ci.test.mjs` |
+
+CI reports two checks that stand for all of it, named so that branch protection
+on `main` can require them without changing whenever a job does:
+
+- **`All Checks`**, the last job in `.github/workflows/ci.yml`. It needs every
+  other job there, and fails if any of them failed, was cancelled or was
+  skipped.
+- **`PR Title`**, from `.github/workflows/pr-title.yml`. Squash merge makes the
+  title the commit on `main`, so it must be a conventional commit:
+  `type(scope)!: description`, scope and `!` optional, with a type from `feat`,
+  `fix`, `perf`, `refactor`, `docs`, `style`, `test`, `chore`, `build`, `ci` or
+  `revert`. It runs again whenever the title is edited.
 
 ## License
 

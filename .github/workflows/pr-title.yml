@@ -1,0 +1,36 @@
+# Squash merge makes the pull request title the commit on main, so the title
+# must be a conventional commit.
+#
+# This lives apart from ci.yml because it has to run again when the title is
+# edited, and `edited` also fires on every body edit. On ci.yml that would re-run
+# the test matrix each time the publish skill rewrites the attestation.
+name: PR Title
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-title-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  pr-title:
+    name: PR Title
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+      # The title reaches the script through the environment, never through
+      # `${{ }}` interpolation into the shell: it is text anyone opening a pull
+      # request controls, and interpolation would run it.
+      - name: Check the PR title
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: node scripts/check-pr-title.mjs "$PR_TITLE"
