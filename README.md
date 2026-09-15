@@ -18,13 +18,18 @@ by construction. That is what makes it proof rather than decoration.
 
 ```sh
 npx skills@latest add https://github.com/Thurbeen/publish \
-  --skill publish --agent claude-code --global --yes
+  --skill publish --agent universal claude-code --global --yes
 ```
 
 `--global` installs it for your user, so one install covers every repository you
-publish from; `--agent` takes any agent [`skills`](https://www.npmjs.com/package/skills)
-supports. Nothing goes on `PATH` and nothing is compiled — the skill is prose an
-agent reads, and that is the whole deliverable.
+publish from. `universal` puts the one real copy in `~/.agents/skills/publish`,
+the directory that is not tied to any one agent. Every other agent you name gets
+a symlink to that copy, such as `~/.claude/skills/publish` →
+`../../.agents/skills/publish`, so an update lands everywhere at once. Swap
+`claude-code` for any agents [`skills`](https://www.npmjs.com/package/skills)
+supports, but keep `universal` and at least one more: with `--yes` and a single
+target, the CLI copies instead of linking. Nothing goes on `PATH` and nothing is
+compiled — the skill is prose an agent reads, and that is the whole deliverable.
 
 ## When an agent should load it
 
@@ -220,8 +225,9 @@ skills/publish/templates/change-request-body.md  the five-heading body to fill i
 skills/publish/templates/attestation.md          the block that goes under ## Attestation
 ```
 
-`npx skills add` copies `skills/publish/` and nothing else, so everything the
-skill promises lives inside that directory.
+`npx skills add` installs `skills/publish/` and nothing else, into
+`.agents/skills/publish` with each agent's directory linked to it, so everything
+the skill promises lives inside that directory.
 [`tests/skill-self-contained.test.mjs`](tests/skill-self-contained.test.mjs) is
 what keeps it that way.
 
