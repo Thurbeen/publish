@@ -1,19 +1,19 @@
 # The forge
 
-Loaded by phase 1. The gate is the same everywhere; only the last three phases
+Loaded by phase 1. The gate is the same everywhere; only three phases
 touch a forge, and they touch it through four operations. This file is the
 adapter table.
 
 ## The four operations
 
-Everything phases 1, 7 and 8 need, and nothing else:
+Everything phases 1, 8 and 9 need, and nothing else:
 
 | # | operation | why the skill needs it |
 | --- | --- | --- |
 | 1 | **default branch** | what to rebase onto and target, when the declaration does not say |
-| 2 | **open or update a change request**, body from a file | phase 7; the body is where the attestation lives |
+| 2 | **open or update a change request**, body from a file | phase 8; the body is where the attestation lives |
 | 3 | **the head commit** the change request would merge | the value the attestation must name to be current |
-| 4 | **watch the pipeline** to a terminal state | phase 8; a pipeline still running is not a green one |
+| 4 | **watch the pipeline** to a terminal state | phase 9; a pipeline still running is not a green one |
 
 A change request is a pull request on GitHub and a merge request on GitLab. The
 skill says "change request" where the difference does not matter and uses the
@@ -28,7 +28,7 @@ git remote get-url origin
 ```
 
 Match the host, and confirm the CLI is authenticated before phase 2 rather than
-discovering it at phase 7, after the branch is already pushed. An
+discovering it at phase 8, after the branch is already pushed. An
 unauthenticated CLI is a `skipped` publish, not a retry loop.
 
 ## GitHub, through `gh`
@@ -100,6 +100,6 @@ and nothing downstream can verify a body nobody wrote.
 Adding a forge means giving all four operations, with a way to read the head as
 a full commit sha and a way to wait for a pipeline rather than sample it. A
 forge that cannot do operation 3 cannot carry an attestation at all, and a forge
-that cannot do operation 4 makes phase 8 permanently `skipped` - which blocks.
+that cannot do operation 4 makes phase 9 permanently `skipped` - which blocks.
 Half of an adapter is worse than none, because the missing half is discovered
 after the push.

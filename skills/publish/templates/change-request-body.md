@@ -1,21 +1,20 @@
 <!-- The change request body - a pull request on GitHub, a merge request on
      GitLab. Fill it in and delete every comment as you answer it: what ships
      must read as prose a teammate wrote, with no template residue in it.
-     Four headings, this order. Then append the attestation block from
-     templates/attestation.md, last, after everything else. -->
+     Five headings, this order and this spelling. -->
 
-## Why
+## Intent
 
 <!-- The reason this change exists, in the terms of whoever wanted it. One
      short paragraph. Not a summary of the diff - the reader has the diff. -->
 
-## What changed
+## What Changed
 
 <!-- At reviewer altitude: the shape of the change, the decisions inside it,
      what was deliberately left out. Bullets. Skip anything the diff makes
      obvious on its own. -->
 
-## Risk
+## Risk Assessment
 
 <!-- What a reviewer cannot see in the diff. Breaking changes, migrations,
      data effects, anything that needs a deploy in a particular order, paths
@@ -24,11 +23,18 @@
      Nothing to say here is itself worth one line saying so. No scores, no
      percentages, no estimates. -->
 
-## Gate
+## Testing
 
-<!-- What the gate did to this branch: how many review rounds it took, what it
-     found, what got fixed as a result, and which gate steps ran.
+<!-- What was run and how the change was verified: how many review rounds it
+     took, what they found and what got fixed, which gate steps ran, what the
+     documentation step updated, and how CI ended. Name what was not verified
+     too.
 
      Name any step that is skipped or failed, and why - the attestation records
      it either way, and a reader should not have to parse JSON to learn that
      something did not run. -->
+
+## Attestation
+
+<!-- The block from templates/attestation.md, filled in, and nothing after it.
+     Keep the heading: it is where a reader looks for the proof. -->

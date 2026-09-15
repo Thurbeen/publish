@@ -129,6 +129,37 @@ export function parseDeclaration(text) {
   return doc ?? {};
 }
 
+/** The keys a `gate[]` entry may carry. */
+export const STEP_KEYS = ["name", "run", "fix", "instructions"];
+
+/**
+ * What is wrong with a parsed declaration, as one line per problem - empty when
+ * it is well-formed. A broken entry is reported, never repaired, because the
+ * skill records it as a skipped step rather than guessing what was meant.
+ */
+export function validateDeclaration(doc) {
+  const problems = [];
+  if (doc.version !== 1) problems.push("version is not 1");
+  if (!Array.isArray(doc.gate)) return [...problems, "gate is not a list"];
+  const text = (v) => typeof v === "string" && v.length > 0;
+  for (const [i, step] of doc.gate.entries()) {
+    const at = `gate[${i}]`;
+    if (step === null || typeof step !== "object" || Array.isArray(step)) {
+      problems.push(`${at} is not a step`);
+      continue;
+    }
+    for (const key of Object.keys(step)) {
+      if (!STEP_KEYS.includes(key)) problems.push(`${at}.${key} is not a step key`);
+    }
+    if (!text(step.name)) problems.push(`${at}.name is missing`);
+    const runs = Array.isArray(step.run) ? step.run : [step.run];
+    if (runs.length === 0 || !runs.every(text)) problems.push(`${at}.run is not a command or a list of them`);
+    if ("fix" in step && !text(step.fix)) problems.push(`${at}.fix is not a command`);
+    if ("instructions" in step && !text(step.instructions)) problems.push(`${at}.instructions is not text`);
+  }
+  return problems;
+}
+
 /** Every fenced code block of a given language in a markdown file. */
 export function fencedBlocks(text, lang) {
   const out = [];

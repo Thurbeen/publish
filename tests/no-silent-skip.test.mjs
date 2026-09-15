@@ -95,7 +95,7 @@ test("a skipped step cannot be reported as success", () => {
 });
 
 test("a red pipeline cannot be reported as success", () => {
-  const ci = /## Phase 8 - CI\n([\s\S]*?)\n## /.exec(skill);
+  const ci = /## Phase 9 - CI\n([\s\S]*?)\n## /.exec(skill);
   assert.ok(ci, "there is no CI phase");
   assert.match(
     ci[1],

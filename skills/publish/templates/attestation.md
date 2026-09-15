@@ -1,8 +1,8 @@
-<!-- The attestation block. It goes last in the change request body,
-     after every prose section. Copy from the fence below, fill every field, and delete this
-     comment.
+<!-- The attestation block. It goes under the `## Attestation` heading of the
+     change request body, last, with nothing after it. Copy from the fence
+     below, fill every field, and delete this comment.
 
-     head_sha comes from `git rev-parse HEAD` after the push in phase 6, never
+     head_sha comes from `git rev-parse HEAD` after the push in phase 7, never
      from anywhere else and never typed by hand. Push again and this whole block
      is rewritten for the new head.
 
@@ -37,6 +37,10 @@
       "name": "test",
       "status": "passed",
       "command": "<the command the declaration named>"
+    },
+    {
+      "name": "documentation",
+      "status": "passed"
     },
     {
       "name": "ci",

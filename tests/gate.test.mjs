@@ -5,13 +5,13 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import path from "node:path";
-import { ROOT, SKILL_DIR, fencedBlocks, parseDeclaration, read } from "./helpers.mjs";
+import { ROOT, SKILL_DIR, SKILL_MD, STEP_KEYS, fencedBlocks, parseDeclaration, read, validateDeclaration } from "./helpers.mjs";
 
 const GATE_MD = path.join(SKILL_DIR, "references", "gate.md");
 const reference = read(GATE_MD);
 
 const TOP_LEVEL = ["version", "forge", "base", "review", "gate", "ci"];
-const STEP_KEYS = ["name", "run", "fix"];
+
 
 /** Every `.publish.yaml` the reference shows, parsed. */
 const examples = fencedBlocks(reference, "yaml").map((y) => ({
@@ -27,7 +27,7 @@ test("the reference documents the file, and it is .publish.yaml at the root", ()
 test("every documented key is in the table, and every table key is documented", () => {
   const table = new Set();
   for (const m of reference.matchAll(/^\| `([\w.[\]]+)` \|/gm)) table.add(m[1]);
-  const documented = ["version", "forge", "base", "gate", "review.rules", "gate[].name", "gate[].run", "gate[].fix", "ci.required", "ci.timeout"];
+  const documented = ["version", "forge", "base", "gate", "review.rules", "gate[].name", "gate[].run", "gate[].fix", "gate[].instructions", "ci.required", "ci.timeout"];
   for (const key of documented) {
     assert.ok(table.has(key), `the key table does not describe ${key}`);
   }
@@ -42,6 +42,7 @@ test("every worked declaration uses only documented keys", () => {
     for (const key of Object.keys(doc)) {
       assert.ok(TOP_LEVEL.includes(key), `${key} is not a documented top-level key:\n${yaml}`);
     }
+    assert.deepEqual(validateDeclaration(doc), [], `a worked declaration is broken:\n${yaml}`);
     assert.equal(doc.version, 1, `every example must declare version 1:\n${yaml}`);
     assert.ok(Array.isArray(doc.gate), `gate must be a list:\n${yaml}`);
     for (const step of doc.gate) {
@@ -117,10 +118,53 @@ test("this repository declares its own gate, and it parses", () => {
     assert.ok(step.name && step.run, "this repository's own declaration is malformed");
     for (const key of Object.keys(step)) assert.ok(STEP_KEYS.includes(key), `${key} is not a step key`);
   }
+  assert.deepEqual(validateDeclaration(own), [], "this repository's own declaration is broken");
   assert.equal(own.ci.required, true);
 });
 
 test("the parser rejects what it cannot read rather than guessing", () => {
   assert.throws(() => parseDeclaration("version: 1\n\tgate: []\n"), /tab indentation/);
   assert.throws(() => parseDeclaration("- one\nnot a list item\n"), /not a key|expected a list item/);
+});
+
+const step = (extra) => `version: 1\ngate:\n  - name: test\n    run: npm test\n${extra}`;
+
+test("a step's instructions, when present, are text handed over as written", () => {
+  const doc = parseDeclaration(step('    instructions: "Run it twice before calling the socket test red."\n'));
+  assert.deepEqual(validateDeclaration(doc), []);
+  assert.equal(doc.gate[0].instructions, "Run it twice before calling the socket test red.");
+  assert.ok(
+    examples.some(({ doc }) => doc.gate.some((s) => typeof s.instructions === "string")),
+    "no worked declaration shows instructions",
+  );
+});
+
+test("a step with no instructions is exactly what it was before", () => {
+  const doc = parseDeclaration(step(""));
+  assert.deepEqual(validateDeclaration(doc), []);
+  assert.deepEqual(Object.keys(doc.gate[0]), ["name", "run"]);
+});
+
+test("instructions that are not text make the declaration broken", () => {
+  const wrong = {
+    number: "    instructions: 42\n",
+    boolean: "    instructions: true\n",
+    "empty list": "    instructions: []\n",
+    list: "    instructions:\n      - one\n      - two\n",
+    map: "    instructions:\n      when: red\n",
+    nothing: "    instructions:\n",
+  };
+  for (const [kind, extra] of Object.entries(wrong)) {
+    const problems = validateDeclaration(parseDeclaration(step(extra)));
+    assert.ok(problems.some((p) => p.includes("instructions")), `instructions as ${kind} was accepted`);
+  }
+});
+
+test("the reference and the skill say what instructions are for", () => {
+  assert.match(reference, /\| `gate\[\]\.instructions` \| no \|/);
+  assert.match(reference, /`instructions`, when it is there, is text/, "the reference must reject non-text instructions");
+  const gate = /## Phase 4 - gate\n([\s\S]*?)\n## /.exec(read(SKILL_MD));
+  assert.ok(gate, "there is no gate phase");
+  assert.match(gate[1], /`instructions`/, "the gate phase never hands a step's instructions over");
+  assert.match(gate[1], /read its failure|fix/, "instructions must reach whoever fixes the step, not only who runs it");
 });

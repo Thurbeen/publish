@@ -30,7 +30,11 @@ function block(headSha, overrides = {}) {
   ].join("\n");
 }
 
-const prose = "## Why\n\nSomething needed doing.\n\n";
+// A body in the shape the skill ships: the body template's five headings, with
+// its comments answered, and the block appended under ## Attestation.
+const prose = read(path.join(SKILL_DIR, "templates", "change-request-body.md"))
+  .replace(/<!--[\s\S]*?-->/g, "Filled in.")
+  .trimEnd() + "\n\n";
 
 /**
  * Every verification recipe the skill documents, one per forge adapter, as the
@@ -141,10 +145,29 @@ test("the template block is well-formed and names every required field", () => {
     assert.ok(field in json, `the template is missing ${field}`);
   }
   assert.match(json.head_sha, /^[0-9a-f]{40}$/, "head_sha must be a full 40-character sha");
+  const STEP_FIELDS = ["name", "status", "command", "reason", "rounds", "findings", "fixed", "run_url", "conclusion"];
   for (const step of json.steps) {
     assert.ok(step.name, "every step needs a name");
     assert.ok(STATUSES.includes(step.status), `${step.status} is not one of the four statuses`);
+    for (const field of Object.keys(step)) {
+      assert.ok(STEP_FIELDS.includes(field), `${step.name} carries ${field}, which the field contract does not define`);
+    }
   }
+});
+
+test("the template records the documentation step after the gate and before CI", () => {
+  const names = JSON.parse(fencedBlocks(TEMPLATE, "json")[0]).steps.map((s) => s.name);
+  const docs = names.indexOf("documentation");
+  assert.ok(docs !== -1, "the template has no documentation step");
+  assert.ok(docs > names.indexOf("test") && docs < names.indexOf("ci"), `steps are out of order: ${names}`);
+  assert.match(REFERENCE, /The documentation step/, "the reference must define the documentation step");
+});
+
+test("the filled body carries the attestation under ## Attestation, last", () => {
+  const body = prose + block(HEAD);
+  const heading = body.indexOf("\n## Attestation\n");
+  assert.ok(heading !== -1 && body.indexOf(`<!-- ${MARKER} -->`) > heading, "the block is not under ## Attestation");
+  assert.ok(body.trimEnd().endsWith("<!-- /publish-attestation -->"), "something follows the attestation");
 });
 
 test("the three answers are the same words on every forge", () => {

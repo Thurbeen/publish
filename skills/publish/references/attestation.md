@@ -1,8 +1,9 @@
 # The attestation
 
-Loaded by phase 7. The attestation is the block this skill writes into the
-change request body. It is a verdict about one commit, and it is worth
-exactly as much as its ability to go stale.
+Loaded by phase 8. The attestation is the block this skill writes into the
+change request body, under its `## Attestation` heading and last. It is a
+verdict about one commit, and it is worth exactly as much as its ability to go
+stale.
 
 ## The marker
 
@@ -65,6 +66,9 @@ Each step:
   exists to prevent, so a block containing one is malformed.
 - The review step also carries `rounds`, `findings` and `fixed`.
 - The CI step also carries `run_url` and `conclusion`.
+- The documentation step is named `documentation`, comes after the gate's
+  steps and before CI, and carries nothing beyond `name`, `status` and, when it
+  did not pass, `reason`.
 
 ## The verdict rule
 
