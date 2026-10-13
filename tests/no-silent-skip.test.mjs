@@ -127,17 +127,17 @@ test("a repository with no pipeline is not quietly green", () => {
   );
 });
 
-test("no declared gate step may be dropped", () => {
+test("no resolved gate step may be dropped", () => {
   const gate = /## Phase 4 - gate\n([\s\S]*?)\n## /.exec(skill);
   assert.ok(gate, "there is no gate phase");
   assert.match(
     gate[1],
-    /do not drop a step\s+because it looks redundant/,
-    "the gate phase must forbid dropping a declared step",
+    /do\s+not drop a resolved step because it looks redundant/,
+    "the gate phase must forbid dropping a declared or discovered step",
   );
   assert.match(
     gate[1],
-    /Never edit the declaration to make a step pass/,
+    /Never edit the declaration or discovery source to make a step pass/,
     "the gate phase must forbid the other way of making a step disappear",
   );
 });
