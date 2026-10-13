@@ -47,13 +47,16 @@ test("the Testing section asks for evidence and names what was not verified", ()
 
 test("frontend changes put honest before and after visual evidence in the change request", () => {
   const skill = read(SKILL_MD);
-  const phase = /## Phase 8 - change request\n([\s\S]*?)\n## /.exec(skill)?.[1] ?? "";
-  const contract = `${phase}\n${BODY}`.replace(/\s+/g, " ");
+  const phase = (/## Phase 8 - change request\n([\s\S]*?)\n## /.exec(skill)?.[1] ?? "").replace(/\s+/g, " ");
+  const template = BODY.replace(/\s+/g, " ");
 
-  assert.match(contract, /frontend changes/i, "the skill never identifies changes that need visual evidence");
-  assert.match(contract, /before\/after GIF/i, "motion and interaction changes need a before/after GIF");
-  assert.match(contract, /paired before\/after screenshots/i, "other frontend changes need paired screenshots");
-  assert.match(contract, /prior state cannot be captured/i, "an unavailable prior state needs an honest fallback");
-  assert.match(contract, /not visually observable/i, "non-visual frontend work needs an explicit path");
-  assert.match(contract, /PR or MR description/i, "the evidence must be placed where reviewers will see it");
+  for (const contract of [phase, template]) {
+    assert.match(contract, /frontend changes/i, "frontend changes are not identified as needing visual evidence");
+    assert.match(contract, /before\/after GIF/i, "motion and interaction changes need a before/after GIF");
+    assert.match(contract, /paired before\/after screenshots/i, "other frontend changes need paired screenshots");
+    assert.match(contract, /prior state cannot be captured/i, "an unavailable prior state needs an honest fallback");
+    assert.match(contract, /not visually observable/i, "non-visual frontend work needs an explicit path");
+  }
+  assert.match(phase, /PR or MR description/i, "the evidence must be placed where reviewers will see it");
+  assert.match(phase, /blocks the change request/i, "missing evidence must block rather than be silently waived");
 });
