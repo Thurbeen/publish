@@ -50,7 +50,11 @@ with two.
   still running all block.
 - **The change request body** has four headings, in order: `## Intent`,
   `## What Changed`, `## Risk Assessment`, `## Testing`. It carries no machine
-  attestation; the checked head and results go to the requester.
+  attestation; the checked head and results go to the requester. Frontend
+  changes add visual evidence under `## What Changed`: a before/after GIF when
+  motion or interaction matters, otherwise paired before/after screenshots.
+  An unavailable prior state or a change that is not visually observable is
+  disclosed with the closest honest verification instead of invented media.
 - **Infrastructure changes**, including infrastructure directories in mixed
   repositories, get one plan-review comment built from current-head preview
   evidence, updated on every re-publish. Missing or stale plans block, and the
