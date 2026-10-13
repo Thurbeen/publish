@@ -36,11 +36,13 @@ with two.
 ## How it works
 
 <p align="center">
-  <img src="assets/workflow.svg" width="860" alt="The publish workflow. Phases 0 to 10 run in order: precedence, preflight, rebase, review, gate, documentation, commit, push, change request, CI, an infrastructure plan review when infrastructure is affected, then feedback and the report. Review findings, gate failures, red CI and feedback fixes all return to review. Another publishing path hands over; a wrong branch, dirty tree, missing adapter or rebase conflict stops; an unrunnable required gate step, a fifth review round still finding defects, missing plan evidence or a point raised after two rounds blocks.">
+  <a href="assets/workflow.svg"><img src="assets/workflow.gif" width="860" alt="The publish workflow. Phases 0 to 10 run in order: precedence, preflight, rebase, review, gate, documentation, commit, push, change request, CI, an infrastructure plan review when infrastructure is affected, then feedback and the report. Review findings, gate failures, red CI and feedback fixes all return to review. Another publishing path hands over; a wrong branch, dirty tree, missing adapter or rebase conflict stops; an unrunnable required gate step, a fifth review round still finding defects, missing plan evidence or a point raised after two rounds blocks."></a>
 </p>
 
-The blue return rail traces fixes back to review. Its motion is restrained and
-becomes static when the viewer prefers reduced motion.
+The blue return rail traces fixes back to review. GitHub displays the GIF using
+each viewer's animated-image autoplay setting, which syncs with system reduced
+motion by default. The linked SVG stays readable when static and disables its
+CSS motion where reduced-motion media queries are supported.
 
 - **Review is the product.** It reads the repository's own rules first, keeps
   only findings with a concrete failure scenario, and loops until a round finds

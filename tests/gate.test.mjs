@@ -179,3 +179,10 @@ test("the reference and the skill say what instructions are for", () => {
   assert.match(gate[1], /`instructions`/, "the gate phase never hands a step's instructions over");
   assert.match(gate[1], /read its failure|fix/, "instructions must reach whoever fixes the step, not only who runs it");
 });
+
+test("phase 4 runs every resolved gate step whether declared or discovered", () => {
+  const gate = /## Phase 4 - gate\n([\s\S]*?)\n## /.exec(read(SKILL_MD));
+  assert.ok(gate, "there is no gate phase");
+  assert.match(gate[1], /resolved steps/i);
+  assert.match(gate[1], /declared or discovered/i);
+});

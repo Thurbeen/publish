@@ -17,7 +17,7 @@ Only phases 1, 8, 9 and 10 touch the forge, through the adapter table in [`refer
   2 rebase          onto the fresh base
   3 review     ◀─┐  adversarial, against this repository's rules
       └─ fixes ──┘  until a round finds nothing
-  4 gate            exactly the declared steps
+  4 gate            exactly the resolved steps
   5 documentation   what the change made stale, its own commit
   6 commit          the review and gate fixes
   7 push
@@ -134,8 +134,9 @@ command as the review step's `command`.
 
 ## Phase 4 - gate
 
-Run exactly the declared steps, in order, from the repository root. Do not add
-a step the toolchain suggests, and do not drop a step because it looks redundant.
+Run exactly the resolved steps - declared or discovered - in order, from the
+repository root. Do not add an unrelated step the toolchain suggests, and do
+not drop a resolved step because it looks redundant.
 
 A step's `instructions` are the repository's notes on it: read them before
 running it and keep them while you run it, read its failure or fix it. Hand
@@ -147,8 +148,8 @@ them over verbatim with any of that work.
 - **Cannot run** (missing command, toolchain or credential): `skipped` with the
   reason. It blocks; tell the user now.
 
-Never edit the declaration to make a step pass. A wrong declared command is a
-finding to report.
+Never edit the declaration or discovery source to make a step pass. A wrong
+declared or discovered command is a finding to report.
 
 ## Phase 5 - documentation
 
