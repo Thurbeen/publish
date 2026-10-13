@@ -13,14 +13,15 @@ const reference = read(GATE_MD);
 const TOP_LEVEL = ["version", "forge", "base", "review", "gate", "ci", "feedback"];
 
 
-/** Every `.publish.yaml` the reference shows, parsed. */
+/** Every publish declaration the reference shows, parsed. */
 const examples = fencedBlocks(reference, "yaml").map((y) => ({
   yaml: y,
   doc: parseDeclaration(y),
 }));
 
-test("the reference documents the file, and it is .publish.yaml at the root", () => {
-  assert.match(reference, /`\.publish\.yaml`, at the repository root/);
+test("the reference documents both optional declaration names at the root", () => {
+  assert.match(reference, /`\.publish\.yaml` or `\.publish\.yml`, at the repository root/);
+  assert.match(reference, /When both exist,[\s\S]*`\.publish\.yaml` remains authoritative/);
   assert.ok(examples.length >= 4, `only ${examples.length} worked declarations`);
 });
 
@@ -84,25 +85,35 @@ test("an empty gate is declared, and an absent gate is not the same thing", () =
 test("an undeclared repository falls back in a stated order and never silently", () => {
   const section = reference.slice(reference.indexOf("## When there is no declaration"));
   assert.ok(section.length > 400, "there is no fallback section");
-  for (const source of ["AGENTS.md", "CONTRIBUTING.md", "justfile", "package.json"]) {
+  for (const source of ["AGENTS.md", "CONTRIBUTING.md", ".github/workflows", "justfile", "package.json"]) {
     assert.ok(section.includes(source), `the fallback order does not mention ${source}`);
   }
-  assert.match(section, /name the gate source in the final report/, "an inferred gate must be labelled as one");
+  assert.match(section, /name the gate source in the final report/i, "an inferred gate must be labelled as one");
   assert.match(section, /discovered:/, "the reference must show what an inferred gate_source looks like");
   assert.match(
     section,
-    /the gate is `skipped`, not absent/,
-    "finding no gate must block, not pass",
+    /record the gate as\s+`not-applicable`/,
+    "an exhaustive search finding no native gate must not refuse publication",
   );
   assert.match(
     section,
-    /Do\s+not write that file for them/,
+    /Do not create a\s+declaration/,
     "a skill that writes the gate it then certifies against has certified nothing",
   );
 });
 
+test("an absent publish config derives and validates the repository-native gate", () => {
+  const section = reference.slice(reference.indexOf("## When there is no declaration"));
+  assert.match(section, /neither `\.publish\.yaml` nor `\.publish\.yml`/i);
+  for (const source of ["AGENTS.md", "CONTRIBUTING.md", "package.json", ".github/workflows"]) {
+    assert.ok(section.includes(source), `gate discovery does not inspect ${source}`);
+  }
+  assert.match(section, /run the discovered commands in phase 4/i, "an inferred gate is never validated");
+  assert.match(section, /missing (?:publish )?config[^.]*does not block/i, "missing config still refuses publication");
+});
+
 test("the reference refuses to make the repository depend on a YAML parser", () => {
-  assert.match(reference, /Do not add a YAML parser to the repository being\s+published/);
+  assert.match(reference, /Do not add a YAML parser to the repository\s+being published/);
 });
 
 test("a broken declaration is reported, not guessed at", () => {

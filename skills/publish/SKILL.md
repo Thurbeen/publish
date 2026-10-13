@@ -85,8 +85,10 @@ git remote get-url origin                # which forge
 - **Never publish from the base branch.** Stop and ask for a branch name;
   never create one silently.
 - **Gate:** read [`references/gate.md`](references/gate.md). Read it now: it
-  resolves the declaration, including `forge:` and `base:`, and the steps phase
-  4 runs. A gate you could not resolve is `skipped`.
+  resolves an explicit declaration or derives the repository-native gate,
+  including any declared `forge:` and `base:`, and the steps phase 4 runs. A
+  discovered command that cannot run is `skipped`; missing publish config alone
+  is not.
 - **Forge:** read [`references/forge.md`](references/forge.md) and pick the
   adapter from `forge:` or the origin host.
   **Check the forge CLI is authenticated here, before phase 2**, not after the
