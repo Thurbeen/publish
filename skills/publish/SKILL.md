@@ -199,6 +199,22 @@ delete its comments. The body is teammate prose under exactly four headings:
 skipped checks. Do not put an attestation heading, JSON block, marker or
 hidden attestation comment in the body or in a comment.
 
+Inspect the whole branch diff for frontend changes: anything that changes what
+a person sees or does in a rendered interface. Put **Visual evidence** in the
+PR or MR description under `## What Changed`:
+
+- When motion or interaction is material, use a before/after GIF.
+- Otherwise, use paired before/after screenshots of the same state and viewport.
+- Capture the before state from the base and the after state from the current
+  head. Never invent, retouch or substitute unrelated media.
+- If the prior state cannot be captured, say why and provide the after evidence
+  plus the closest reproducible evidence of the prior behaviour. If the change
+  is not visually observable, say why and name the non-visual verification.
+
+The two exceptions are explicit disclosures, not silent waivers. A frontend
+change with neither the required media nor an applicable disclosure blocks the
+change request.
+
 Open it with operation 2, or update the one already open from this branch. The
 title may become the squash commit: conventional prefix, imperative, no
 trailing period.

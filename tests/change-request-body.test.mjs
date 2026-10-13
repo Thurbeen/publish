@@ -44,3 +44,16 @@ test("the Testing section asks for evidence and names what was not verified", ()
   assert.match(testing, /run in this session/, "Testing must say what ran here, not what should work");
   assert.match(testing, /not verified/, "Testing must label what was not verified");
 });
+
+test("frontend changes put honest before and after visual evidence in the change request", () => {
+  const skill = read(SKILL_MD);
+  const phase = /## Phase 8 - change request\n([\s\S]*?)\n## /.exec(skill)?.[1] ?? "";
+  const contract = `${phase}\n${BODY}`.replace(/\s+/g, " ");
+
+  assert.match(contract, /frontend changes/i, "the skill never identifies changes that need visual evidence");
+  assert.match(contract, /before\/after GIF/i, "motion and interaction changes need a before/after GIF");
+  assert.match(contract, /paired before\/after screenshots/i, "other frontend changes need paired screenshots");
+  assert.match(contract, /prior state cannot be captured/i, "an unavailable prior state needs an honest fallback");
+  assert.match(contract, /not visually observable/i, "non-visual frontend work needs an explicit path");
+  assert.match(contract, /PR or MR description/i, "the evidence must be placed where reviewers will see it");
+});
