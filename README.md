@@ -36,8 +36,13 @@ with two.
 ## How it works
 
 <p align="center">
-  <img src="assets/workflow.svg" width="860" alt="The publish workflow. Phases 0 to 10 run in order: precedence, preflight, rebase, review, gate, documentation, commit, push, change request, CI, an infrastructure plan review when infrastructure is affected, then feedback and the report. Review findings, gate failures, red CI and feedback fixes all return to review. Another publishing path hands over; a wrong branch, dirty tree, missing adapter or rebase conflict stops; an unrunnable gate step, a fifth review round still finding defects, missing plan evidence or a point raised after two rounds blocks.">
+  <a href="assets/workflow.svg"><img src="assets/workflow.gif" width="860" alt="The publish workflow. Phases 0 to 10 run in order: precedence, preflight, rebase, review, gate, documentation, commit, push, change request, CI, an infrastructure plan review when infrastructure is affected, then feedback and the report. Review findings, gate failures, red CI and feedback fixes all return to review. Another publishing path hands over; a wrong branch, dirty tree, missing adapter or rebase conflict stops; an unrunnable required gate step, a fifth review round still finding defects, missing plan evidence or a point raised after two rounds blocks."></a>
 </p>
+
+The blue return rail traces fixes back to review. GitHub displays the GIF using
+each viewer's animated-image autoplay setting, which syncs with system reduced
+motion by default. The linked SVG stays readable when static and disables its
+CSS motion where reduced-motion media queries are supported.
 
 - **Review is the product.** It reads the repository's own rules first, keeps
   only findings with a concrete failure scenario, and loops until a round finds
@@ -50,7 +55,11 @@ with two.
   still running all block.
 - **The change request body** has four headings, in order: `## Intent`,
   `## What Changed`, `## Risk Assessment`, `## Testing`. It carries no machine
-  attestation; the checked head and results go to the requester.
+  attestation; the checked head and results go to the requester. Frontend
+  changes add visual evidence under `## What Changed`: a before/after GIF when
+  motion or interaction matters, otherwise paired before/after screenshots.
+  An unavailable prior state or a change that is not visually observable is
+  disclosed with the closest honest verification instead of invented media.
 - **Infrastructure changes**, including infrastructure directories in mixed
   repositories, get one plan-review comment built from current-head preview
   evidence, updated on every re-publish. Missing or stale plans block, and the
@@ -62,9 +71,10 @@ with two.
   On a re-publish it also runs before review. Details:
   [`feedback.md`](skills/publish/references/feedback.md).
 
-## Declare the gate
+## Declare the gate (optional)
 
-Put `.publish.yaml` at the repository root:
+Put `.publish.yaml` or `.publish.yml` at the repository root to declare the
+gate explicitly. `.publish.yaml` remains authoritative when both exist:
 
 ```yaml
 version: 1
@@ -109,12 +119,14 @@ feedback:
 | `ci.timeout` | no | Default `30m`. |
 | `feedback.wait` | no | Default `15m`. How long to keep reading feedback after CI is green. |
 
-`gate: []` declares no mechanical gate and records `not-applicable`. With no
-`.publish.yaml`, the skill looks in `AGENTS.md`, `CLAUDE.md` or
-`CONTRIBUTING.md`, then a task runner's check target, then the package
-manifest's scripts, and reports the source as `discovered:<file>`. If none
-yields commands, the gate is `skipped` and the verdict is `blocked`. Full
-contract: [`gate.md`](skills/publish/references/gate.md).
+`gate: []` declares no mechanical gate and records `not-applicable`. With
+neither declaration file, the skill derives the gate from agent and contributor
+instructions, pull-request or merge-request CI workflows, task runners,
+manifests and tool configuration. It runs those discovered commands through
+the same phase-4 validation and reports their sources as `discovered:<files>`.
+If the complete search finds no native mechanical check, the gate is
+`not-applicable`; missing publish config alone never blocks. Full contract:
+[`gate.md`](skills/publish/references/gate.md).
 
 ## Reference
 

@@ -9,7 +9,15 @@
 ## What Changed
 
 <!-- Bullets at reviewer altitude: the shape of the change, its decisions,
-     what was deliberately left out. Skip what the diff already shows. -->
+     what was deliberately left out. Skip what the diff already shows.
+
+     For frontend changes, add a **Visual evidence** item to this PR or MR
+     description. Use a before/after GIF when motion or interaction is
+     material; otherwise use paired before/after screenshots of the same state
+     and viewport. If the prior state cannot be captured, say why and include
+     after evidence plus the closest reproducible evidence of the prior
+     behaviour. If the change is not visually observable, say why and name the
+     non-visual verification. Never invent or retouch evidence. -->
 
 ## Risk Assessment
 

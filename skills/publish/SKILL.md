@@ -17,7 +17,7 @@ Only phases 1, 8, 9 and 10 touch the forge, through the adapter table in [`refer
   2 rebase          onto the fresh base
   3 review     ◀─┐  adversarial, against this repository's rules
       └─ fixes ──┘  until a round finds nothing
-  4 gate            exactly the declared steps
+  4 gate            exactly the resolved steps
   5 documentation   what the change made stale, its own commit
   6 commit          the review and gate fixes
   7 push
@@ -85,8 +85,10 @@ git remote get-url origin                # which forge
 - **Never publish from the base branch.** Stop and ask for a branch name;
   never create one silently.
 - **Gate:** read [`references/gate.md`](references/gate.md). Read it now: it
-  resolves the declaration, including `forge:` and `base:`, and the steps phase
-  4 runs. A gate you could not resolve is `skipped`.
+  resolves an explicit declaration or derives the repository-native gate,
+  including any declared `forge:` and `base:`, and the steps phase 4 runs. A
+  discovered command that cannot run is `skipped`; missing publish config alone
+  is not.
 - **Forge:** read [`references/forge.md`](references/forge.md) and pick the
   adapter from `forge:` or the origin host.
   **Check the forge CLI is authenticated here, before phase 2**, not after the
@@ -132,8 +134,9 @@ command as the review step's `command`.
 
 ## Phase 4 - gate
 
-Run exactly the declared steps, in order, from the repository root. Do not add
-a step the toolchain suggests, and do not drop a step because it looks redundant.
+Run exactly the resolved steps - declared or discovered - in order, from the
+repository root. Do not add an unrelated step the toolchain suggests, and do
+not drop a resolved step because it looks redundant.
 
 A step's `instructions` are the repository's notes on it: read them before
 running it and keep them while you run it, read its failure or fix it. Hand
@@ -145,8 +148,8 @@ them over verbatim with any of that work.
 - **Cannot run** (missing command, toolchain or credential): `skipped` with the
   reason. It blocks; tell the user now.
 
-Never edit the declaration to make a step pass. A wrong declared command is a
-finding to report.
+Never edit the declaration or discovery source to make a step pass. A wrong
+declared or discovered command is a finding to report.
 
 ## Phase 5 - documentation
 
@@ -198,6 +201,22 @@ delete its comments. The body is teammate prose under exactly four headings:
 `## Intent`, `## What Changed`, `## Risk Assessment`, `## Testing`. Name
 skipped checks. Do not put an attestation heading, JSON block, marker or
 hidden attestation comment in the body or in a comment.
+
+Inspect the whole branch diff for frontend changes: anything that changes what
+a person sees or does in a rendered interface. Put **Visual evidence** in the
+PR or MR description under `## What Changed`:
+
+- When motion or interaction is material, use a before/after GIF.
+- Otherwise, use paired before/after screenshots of the same state and viewport.
+- Capture the before state from the base and the after state from the current
+  head. Never invent, retouch or substitute unrelated media.
+- If the prior state cannot be captured, say why and provide the after evidence
+  plus the closest reproducible evidence of the prior behaviour. If the change
+  is not visually observable, say why and name the non-visual verification.
+
+The two exceptions are explicit disclosures, not silent waivers. A frontend
+change with neither the required media nor an applicable disclosure blocks the
+change request.
 
 Open it with operation 2, or update the one already open from this branch. The
 title may become the squash commit: conventional prefix, imperative, no

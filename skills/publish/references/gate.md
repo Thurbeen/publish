@@ -5,7 +5,8 @@ them from the repository.
 
 ## The file
 
-`.publish.yaml`, at the repository root:
+`.publish.yaml` or `.publish.yml`, at the repository root. When both exist,
+`.publish.yaml` remains authoritative:
 
 ```yaml
 # .publish.yaml
@@ -86,8 +87,8 @@ gate:
 
 ## Reading the file
 
-Read it as text (`cat .publish.yaml`). Do not add a YAML parser to the repository being
-published, and do not install one. Check as you read:
+Read the selected file as text. Do not add a YAML parser to the repository
+being published, and do not install one. Check as you read:
 
 - `version` is `1`; otherwise fall back as undeclared, and say so.
 - Every `gate[]` entry has a `name` and a `run`. An entry missing either is a
@@ -100,28 +101,38 @@ published, and do not install one. Check as you read:
 
 ## When there is no declaration
 
-No `.publish.yaml`: take the first source that yields commands.
+When there is neither `.publish.yaml` nor `.publish.yml`, derive the gate from
+the repository instead of refusing publication over missing config. Inspect all
+of these sources before deciding:
 
 1. **Agent or contributor instructions** - `AGENTS.md`, `CLAUDE.md`,
-   `CONTRIBUTING.md` - naming the commands to run before pushing, verbatim.
-2. **A task runner target** in a `justfile`, `Makefile` or `scripts/check.sh`,
-   only when named as the check: `check`, `lint`, `test`, `ci`, `verify`.
-   Never a target you are guessing about.
-3. **The manifest's scripts** - `package.json` `scripts.test` and
-   `scripts.lint`; `Cargo.toml` (`cargo test`); `pyproject.toml` (its configured
-   test runner).
+   `CONTRIBUTING.md` - commands required before pushing or opening a change
+   request.
+2. **CI workflows** - `.github/workflows`, `.gitlab-ci.yml` and equivalent
+   repository-native pipeline config. Follow the pull-request or merge-request
+   jobs and record their local verification commands; setup, upload, deploy and
+   credentialed steps are not local gate commands.
+3. **Task runners and check scripts** - a `justfile`, `Makefile`,
+   `scripts/check.sh` or equivalent target named `check`, `ci`, `verify`,
+   `lint`, `test`, `typecheck` or `build`.
+4. **Manifest scripts and tool config** - for example `package.json` scripts,
+   `Cargo.toml`, `pyproject.toml`, language test config and formatter or linter
+   config.
 
-Always name the gate source in the final report - `.publish.yaml`,
-`discovered:AGENTS.md`, `discovered:justfile` - with the commands actually run,
-so a declared gate is distinguishable from an inferred one.
+Instructions and CI say what is required; task runners, manifests and tool
+config resolve the commands they invoke. Keep every required check, preserve
+its declared order, and collapse exact duplicates. Do not invent a command from
+a dependency or a filename. If sources disagree, take the union of their
+required checks and report the disagreement instead of silently choosing one.
 
-Nothing found: the gate is `skipped`, not absent. Record:
+Name the gate source in the final report - `.publish.yaml`, `.publish.yml`,
+`discovered:AGENTS.md+.github/workflows/ci.yml`, or `discovered:package.json` -
+with the commands actually run. Run the discovered commands in phase 4; their
+exit status validates the inferred gate exactly as it validates a declared
+one. A command that cannot run is still `skipped` and blocks.
 
-```json
-{ "name": "gate", "status": "skipped",
-  "reason": "no .publish.yaml and no gate found in AGENTS.md, justfile or package.json" }
-```
-
-The verdict is `blocked` until the owner adds a `.publish.yaml`. Do
-not write that file for them as part of publishing a change: a gate is their
-policy, and one you invent certifies nothing.
+If the complete search finds no native mechanical check, record the gate as
+`not-applicable` with source `discovered:none` and the sources inspected.
+Missing publish config by itself does not block publication. Do not create a
+declaration while publishing: the inferred gate must describe existing
+repository policy, not policy invented by the publisher.
