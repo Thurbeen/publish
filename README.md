@@ -45,10 +45,13 @@ with two.
 </p>
 
 The blue loop carries every fix back to review, and a dot on a phase means it
-has an exit in the side panel. GitHub shows the GIF matching your theme and
-plays it according to your animated-image autoplay setting, which follows the
-system's reduced-motion preference by default. The linked SVG reads fully when
-static and turns its motion off where reduced motion is preferred.
+has an exit in the side panel. The animation follows one run: each phase lights
+as it is reached, a feedback fix takes the loop back to review, everything from
+review on runs again, and the run ends at the report with passed. GitHub shows
+the GIF matching your theme and plays it according to your animated-image
+autoplay setting, which follows the system's reduced-motion preference by
+default. The linked SVG reads fully when static and turns its motion off where
+reduced motion is preferred.
 
 - **Review is the product.** It reads the repository's own rules first, keeps
   only findings with a concrete failure scenario, and loops until a round finds
