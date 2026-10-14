@@ -36,7 +36,7 @@ test("every bit of motion is isolated in one removable block", () => {
 test("the animation tells one publish run: phase by phase, a detour to review, a pause", () => {
   const cycle = Number(/--cycle:\s*([\d.]+)s/.exec(motion)?.[1]);
   assert.ok(cycle >= 12 && cycle <= 24, `cycle of ${cycle}s`);
-  const durations = [...motion.matchAll(/animation:\s*[\w-]+\s+([\d.]+)s/g)].map((m) => Number(m[1]));
+  const durations = [...motion.matchAll(/animation(?:-duration)?:\s*(?:[\w-]+\s+)?([\d.]+)s/g)].map((m) => Number(m[1]));
   assert.ok(durations.length > 0 && durations.every((d) => d === cycle), "every animation must share the one cycle so they stay in step");
   assert.doesNotMatch(motion, /animation:[^;]*\blinear infinite/, "motion is eased, not linear");
 
