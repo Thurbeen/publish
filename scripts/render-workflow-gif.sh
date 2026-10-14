@@ -9,11 +9,11 @@ set -euo pipefail
 root="$(cd "$(dirname "$0")/.." && pwd)"
 svg="$root/assets/workflow.svg"
 chromium="${CHROMIUM:-chromium}"
-fps=10
-seconds="$(grep -oE 'animation: workflow-flow [0-9.]+s' "$svg" | grep -oE '[0-9.]+')"
+fps=12
+seconds="$(grep -oE -- '--cycle: [0-9.]+s' "$svg" | grep -oE '[0-9.]+')"
 width="$(grep -oE '<svg[^>]* width="[0-9]+"' "$svg" | grep -oE '[0-9]+"$' | tr -d '"')"
 height="$(grep -oE '<svg[^>]* height="[0-9]+"' "$svg" | grep -oE '[0-9]+"$' | tr -d '"')"
-frames=$((${seconds%.*} * fps))
+frames="$(awk -v s="$seconds" -v f="$fps" 'BEGIN { printf "%d", s * f }')"
 
 work="$(mktemp -d "$root/.render.XXXXXX")"
 trap 'rm -rf "$work"' EXIT
