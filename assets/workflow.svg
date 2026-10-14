@@ -94,8 +94,10 @@
   </style>
 
   <defs>
-    <marker id="a-flow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="head-flow" d="M0 1 L9 5 L0 9 z"/></marker>
-    <marker id="a-loop" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="head-loop" d="M0 1 L9 5 L0 9 z"/></marker>
+    <!-- Each head starts where its path ends and is FL or LL long, so a path
+         that stops that far short of a box puts the tip exactly on its edge. -->
+    <marker id="a-flow" viewBox="0 0 10 10" refX="0" refY="5" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" orient="auto"><path class="head-flow" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="a-loop" viewBox="0 0 10 10" refX="0" refY="5" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10" orient="auto"><path class="head-loop" d="M0 0 L10 5 L0 10 z"/></marker>
   </defs>
 
   <!-- Card, so the diagram reads on any page background. -->
@@ -126,8 +128,8 @@
   <!-- Spine: one line through every phase, in order. -->
   <rect class="pill" x="260" y="92" width="120" height="28" rx="14"/>
   <text class="start" x="320" y="111">“ship this”</text>
-  <path class="spine" d="M320 120 V974"/>
-  <path class="flow" d="M320 962 V975" marker-end="url(#a-flow)"/>
+  <path class="spine" d="M320 120.625 V942"/>
+  <path class="flow" d="M320 942.625 V967.375" marker-end="url(#a-flow)"/>
 
   <!-- Phases -->
   <rect class="card" x="170" y="166" width="300" height="44" rx="10"/>
@@ -204,7 +206,9 @@
   <rect class="card" x="170" y="976" width="300" height="44" rx="10"/>
   <text class="name" x="186" y="995">Report</text>
   <text class="sub" x="186" y="1011">the verdict at the checked head</text>
-  <path class="flow" d="M320 1020 V1032 M320 1032 H244 V1044 M320 1032 H396 V1044"/>
+  <path class="flow" d="M320 1020.625 V1030"/>
+  <path class="flow" d="M320 1030 H248 Q242 1030 242 1036 V1037.375" marker-end="url(#a-flow)"/>
+  <path class="flow" d="M320 1030 H392 Q398 1030 398 1036 V1037.375" marker-end="url(#a-flow)"/>
   <rect class="pass" x="170" y="1046" width="144" height="30" rx="15"/>
   <text class="out-pass" x="242" y="1066">passed</text>
   <rect class="fail" x="326" y="1046" width="144" height="30" rx="15"/>
@@ -214,19 +218,19 @@
 
   <!-- The fix loop: every fix is new code, so it goes back to review. -->
   <g class="loop">
-    <path d="M170 920 H124 Q112 920 112 908 V401 Q112 389 124 389 H166" marker-end="url(#a-loop)"/>
-    <path d="M170 450 H124 Q112 450 112 438"/>
-    <path d="M170 766 H124 Q112 766 112 754"/>
-    <path d="M170 405 H124 Q112 405 112 393"/>
+    <path d="M169.375 920 H124 Q112 920 112 908 V401 Q112 389 124 389 H159" marker-end="url(#a-loop)"/>
+    <path d="M169.375 450 H124 Q112 450 112 438"/>
+    <path d="M169.375 766 H124 Q112 766 112 754"/>
+    <path d="M169 405 H124 Q112 405 112 393"/>
   </g>
-  <path class="motion" d="M170 920 H124 Q112 920 112 908 V401 Q112 389 124 389 H162"/>
+  <path class="motion" d="M169.375 920 H124 Q112 920 112 908 V401 Q112 389 124 389 H159"/>
   <text class="label" x="102" y="409" text-anchor="end">findings</text>
   <text class="label" x="102" y="454" text-anchor="end">gate fails</text>
   <text class="label" x="102" y="770" text-anchor="end">CI red</text>
   <text class="label" x="102" y="924" text-anchor="end">fixes</text>
 
   <!-- Changed documentation re-runs the gate. -->
-  <path class="flow" d="M470 504 H476 Q486 504 486 494 V460 Q486 450 476 450 H473" marker-end="url(#a-flow)"/>
+  <path class="flow" d="M470.625 504 H480 Q488 504 488 496 V458 Q488 450 480 450 H478.625" marker-end="url(#a-flow)"/>
 
   <!-- Exits: the ways a run ends early, by phase. -->
   <rect class="exits" x="530" y="136" width="300" height="498" rx="14"/>
@@ -276,9 +280,9 @@
 
   <!-- Legend -->
   <g transform="translate(40 1116)">
-    <path class="flow" d="M0 0 H26" marker-end="url(#a-flow)"/>
+    <path class="flow" d="M0 0 H18" marker-end="url(#a-flow)"/>
     <text class="muted" x="34" y="4">next phase</text>
-    <path class="loop" d="M118 0 H144" marker-end="url(#a-loop)"/>
+    <path class="loop" d="M118 0 H134" marker-end="url(#a-loop)"/>
     <text class="muted" x="152" y="4">fix, back to review</text>
     <rect class="chip-infra" x="282" y="-10" width="24" height="20" rx="6"/>
     <text class="num num-infra" x="294" y="4">+</text>
