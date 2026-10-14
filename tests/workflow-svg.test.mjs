@@ -26,6 +26,13 @@ test("the README workflow diagram uses restrained accessible GitHub animation", 
   assert.match(reduced, /\.motion\s*\{[^}]*animation:\s*none/);
   assert.doesNotMatch(svg, /<script|<foreignObject|(?:href|src)=["']https?:\/\//, "the README SVG must stay self-contained and GitHub-compatible");
 
+  const markers = svg.match(/<marker\b[^>]*>/g) ?? [];
+  assert.ok(markers.length > 0, "the diagram has no arrowheads");
+  for (const marker of markers) {
+    assert.match(marker, /markerUnits="userSpaceOnUse"/, `arrowhead scales with stroke width, so its tip misses the edge: ${marker}`);
+    assert.match(marker, /refX="0"/, `arrowhead is not anchored at its base: ${marker}`);
+  }
+
   assert.match(readme, /<source media="\(prefers-color-scheme: dark\)" srcset="assets\/workflow-dark\.gif">/, "dark-theme readers need the dark GIF");
   for (const name of ["workflow.gif", "workflow-dark.gif"]) {
     const gif = fs.readFileSync(path.join(ROOT, "assets", name));
