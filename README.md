@@ -36,13 +36,19 @@ with two.
 ## How it works
 
 <p align="center">
-  <a href="assets/workflow.svg"><img src="assets/workflow.gif" width="860" alt="The publish workflow. Phases 0 to 10 run in order: precedence, preflight, rebase, review, gate, documentation, commit, push, change request, CI, an infrastructure plan review when infrastructure is affected, then feedback and the report. Review findings, gate failures, red CI and feedback fixes all return to review. Another publishing path hands over; a wrong branch, dirty tree, missing adapter or rebase conflict stops; an unrunnable required gate step, a fifth review round still finding defects, missing plan evidence or a point raised after two rounds blocks."></a>
+  <a href="assets/workflow.svg">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="assets/workflow-dark.gif">
+      <img src="assets/workflow.gif" width="860" alt="The publish workflow. Phases 0 to 10 run top to bottom in four stages. Prepare: precedence, preflight, rebase. Verify: review, gate, documentation, commit. Ship: push, change request, CI, and an infrastructure plan review only when infrastructure is affected. Settle: feedback. The report then gives the verdict at the checked head: passed when every step passed or was not applicable, otherwise blocked. Review findings, gate failures, red CI and feedback fixes all return to review along one loop; changed documentation re-runs the gate. A side panel groups the early exits. Hand over: another publish skill, gate tool or agent rule owns publishing. Stop: the base branch, a dirty tree, no forge adapter or login, or a rebase conflict. Block: a fifth review round still finding defects, a required gate step that cannot run, a frontend change without visual evidence or disclosure, CI still running past its timeout, missing or stale plan evidence, or a feedback point still raised after two rounds.">
+    </picture>
+  </a>
 </p>
 
-The blue return rail traces fixes back to review. GitHub displays the GIF using
-each viewer's animated-image autoplay setting, which syncs with system reduced
-motion by default. The linked SVG stays readable when static and disables its
-CSS motion where reduced-motion media queries are supported.
+The blue loop carries every fix back to review, and a dot on a phase means it
+has an exit in the side panel. GitHub shows the GIF matching your theme and
+plays it according to your animated-image autoplay setting, which follows the
+system's reduced-motion preference by default. The linked SVG reads fully when
+static and turns its motion off where reduced motion is preferred.
 
 - **Review is the product.** It reads the repository's own rules first, keeps
   only findings with a concrete failure scenario, and loops until a round finds
@@ -163,6 +169,9 @@ CI exposes two stable checks for branch protection on `main`:
   or was skipped.
 - **`PR Title`** requires a conventional-commit title, because squash merge
   makes it the commit on `main`.
+
+`scripts/render-workflow-gif.sh` regenerates the README's light and dark GIFs
+from `assets/workflow.svg`; it needs `chromium` and `ffmpeg`.
 
 ## License
 
