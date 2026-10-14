@@ -26,7 +26,10 @@ test("the README workflow diagram uses restrained accessible GitHub animation", 
   assert.match(reduced, /\.motion\s*\{[^}]*animation:\s*none/);
   assert.doesNotMatch(svg, /<script|<foreignObject|(?:href|src)=["']https?:\/\//, "the README SVG must stay self-contained and GitHub-compatible");
 
-  const gif = fs.readFileSync(gifPath);
-  assert.equal(gif.subarray(0, 6).toString("ascii"), "GIF89a");
-  assert.ok(gif.toString("latin1").split("\x21\xf9\x04").length > 2, "the GitHub-rendered GIF has fewer than two frames");
+  assert.match(readme, /<source media="\(prefers-color-scheme: dark\)" srcset="assets\/workflow-dark\.gif">/, "dark-theme readers need the dark GIF");
+  for (const name of ["workflow.gif", "workflow-dark.gif"]) {
+    const gif = fs.readFileSync(path.join(ROOT, "assets", name));
+    assert.equal(gif.subarray(0, 6).toString("ascii"), "GIF89a", name);
+    assert.ok(gif.toString("latin1").split("\x21\xf9\x04").length > 2, `${name} has fewer than two frames`);
+  }
 });
