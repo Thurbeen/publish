@@ -1,83 +1,48 @@
-// thurview is a second reviewer the review phase uses when it can: a code graph
-// of the callers and tests a diff does not show. It is optional, it is kept
-// current before it runs, and the final report says which reviewer ran and at
-// which version.
+// thurview is a PR/MR reviewer only: one summary comment, an inline thread per
+// finding, and a `thurview/review` commit status, all read in the feedback
+// phase. It has no local CLI review, no code graph, no page and no fix skill,
+// so the skill must not send an agent looking for any of them.
 import test from "node:test";
 import assert from "node:assert/strict";
+import { ROOT, SKILL_DIR, read, shippedFiles } from "./helpers.mjs";
 import path from "node:path";
-import { SKILL_DIR, SKILL_MD, fencedBlocks, read } from "./helpers.mjs";
 
-const skill = read(SKILL_MD);
-const review = read(path.join(SKILL_DIR, "references", "review.md"));
+const docs = [
+  ...shippedFiles().filter((f) => f.endsWith(".md")).map((f) => path.join(SKILL_DIR, f)),
+  path.join(ROOT, "README.md"),
+];
 
-/** The thurview section of review.md, up to the next second-level heading. */
-function thurviewSection() {
-  const m = /\n## thurview\n([\s\S]*?)(?=\n## |$)/.exec(review);
-  assert.ok(m, "review.md has no `## thurview` section");
-  return m[1];
-}
-
-/** The same section with its line breaks collapsed, for phrases that wrap. */
-function thurviewProse() {
-  return thurviewSection().replace(/\s+/g, " ");
-}
-
-test("the review phase uses thurview when it can, and only then", () => {
-  const phase = /## Phase 3 - review\n([\s\S]*?)\n## /.exec(skill);
-  assert.ok(phase, "there is no review phase");
-  assert.match(phase[1], /thurview/, "the review phase never mentions thurview");
-  assert.match(phase[1], /optional/i, "the review phase must say thurview is optional");
-});
-
-test("thurview is detected as a skill and as a CLI, on PATH or through npx", () => {
-  const section = thurviewSection();
-  const sh = fencedBlocks(section, "sh").join("\n");
-  assert.match(sh, /command -v thurview/, "no check for the CLI on PATH");
-  assert.match(sh, /npx --no-install thurview --version/, "no check for a copy npx already has");
-  assert.match(thurviewProse(), /`thurview` or `review-fix` skill/, "no check for the installed agent skill");
-});
-
-test("thurview is brought up to date before it reviews anything", () => {
-  const section = thurviewSection();
-  const sh = fencedBlocks(section, "sh").join("\n");
-  assert.match(sh, /npm view thurview version/, "no way to learn the latest published version");
-  assert.match(sh, /thurview update/, "no way to update an installed CLI");
-  assert.match(sh, /npm i(?:nstall)? -g thurview@latest/, "no way to update a CLI installed with npm");
-  assert.match(thurviewProse(), /skills@latest update thurview review-fix --global --yes/, "no way to update the skill");
-  assert.match(thurviewProse(), /before (?:the first round|it reviews)/, "the update must come before the review");
-});
-
-test("offline or unable to update: say so and use the installed version", () => {
-  const section = thurviewProse();
-  assert.match(section, /offline|cannot reach the registry/i);
-  assert.match(section, /installed version/, "the fallback is the version already installed");
-  assert.match(section, /say so/i, "a version that could not be checked must be reported as such");
-});
-
-test("no thurview at all: the built-in review, unchanged, and never a requirement", () => {
-  const section = thurviewProse();
-  assert.match(section, /built-in review, unchanged/);
-  assert.match(section, /never a requirement/i);
-  assert.match(skill, /never a requirement/i, "the skill itself must say thurview is never required");
-});
-
-test("thurview runs pinned to the version that was checked, against the reviewed range", () => {
-  const sh = fencedBlocks(thurviewSection(), "sh").join("\n");
-  const runs = sh.split("\n").filter((l) => /thurview@<version> graph/.test(l));
-  assert.ok(runs.length >= 2, "impact and interfaces must both run");
-  for (const line of runs) {
-    assert.match(line, /^npx --yes thurview@<version> graph \w+/, `not a pinned invocation: ${line}`);
-    assert.match(line, /--base <base_sha> --head <head_sha>/, `not pinned to the reviewed range: ${line}`);
+test("nothing relies on the thurview parts that no longer exist", () => {
+  for (const file of docs) {
+    const text = read(file).replace(/\s+/g, " ");
+    for (const gone of [
+      /command -v thurview/,
+      /npx [^`]*thurview/,
+      /npm (?:view|i|install)[^`]*thurview/,
+      /thurview update/,
+      /thurview@/,
+      /\breview-fix\b/,
+      /thurview-fix/,
+      /thurview-publish/,
+      /`thurview` (?:or `[^`]+` )?skill/,
+      /\bgraph (?:impact|interfaces|callers)\b/,
+      /code graph/i,
+      /thurview[^.]*\bpage\b/i,
+    ]) {
+      assert.doesNotMatch(text, gone, `${path.relative(ROOT, file)} still mentions ${gone}`);
+    }
   }
 });
 
-test("thurview's findings go through the same rounds and the same failure-scenario rule", () => {
-  const section = thurviewProse();
-  assert.match(section, /same rounds/);
-  assert.match(section, /failure scenario/);
+test("the review phase is the built-in review alone", () => {
+  const review = read(path.join(SKILL_DIR, "references", "review.md"));
+  assert.doesNotMatch(review, /^## thurview$/m, "review.md still has a thurview section");
+  const skill = read(path.join(SKILL_DIR, "SKILL.md"));
+  const phase = /## Phase 3 - review\n([\s\S]*?)(?=\n## )/.exec(skill)[1];
+  assert.doesNotMatch(phase, /thurview/, "phase 3 still runs thurview locally");
 });
 
-test("the final report records which reviewer ran and its version", () => {
-  assert.match(thurviewProse(), /command in the final report/);
-  assert.match(thurviewSection(), /thurview@<version> graph impact/);
+test("thurview's review check is read with the other review checks", () => {
+  const feedback = read(path.join(SKILL_DIR, "references", "feedback.md")).replace(/\s+/g, " ");
+  assert.match(feedback, /`thurview\/review`/, "the feedback reference never names thurview's commit status");
 });

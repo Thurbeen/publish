@@ -154,7 +154,7 @@ test("the GitHub ledger lists every thread, review, comment and bot summary", ()
     {
       kind: "comment", author: "octo-author", url: "https://github.com/owner/repo/pull/7#issuecomment-1",
       reviewer: "thurview", head: "1".repeat(40), current: false, state: "active", confidence: 2,
-      next: "Next: @octo-author — fix the blocking finding.", open_findings: true,
+      next: "Next: @octo-author — **Confidence 2/5 · do not merge; fix the 1 blocking finding.**", open_findings: true,
     },
     {
       kind: "comment", author: "greptile-apps", url: "https://github.com/owner/repo/pull/7#issuecomment-2",
@@ -175,7 +175,7 @@ test("the GitLab ledger reads discussions the same way, minus GitLab's own syste
     {
       kind: "comment", author: "octo-author", url: "#note_101",
       reviewer: "thurview", head, current: true, state: "active", confidence: 5,
-      next: "Next: merge", open_findings: false,
+      next: "Next: merge — **Confidence 5/5 · no blocking findings.**", open_findings: false,
     },
     { kind: "comment", author: "a-maintainer", url: "#note_105" },
   ]);

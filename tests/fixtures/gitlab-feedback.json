@@ -5,7 +5,7 @@
     "notes": [
       {
         "id": 101,
-        "body": "<!-- thurview-pr-review {\"head\":\"3333333333333333333333333333333333333333\",\"state\":\"active\",\"seen\":\"100\"} -->\nNext: merge\n\n**Confidence 5/5:** Docs only; the suite passes at the head.\n\nNo open findings.\n\nReviewed `3333333`",
+        "body": "<!-- thurview-pr-review {\"head\":\"3333333333333333333333333333333333333333\",\"state\":\"active\",\"seen\":\"100\"} -->\nNext: merge — **Confidence 5/5 · no blocking findings.**\n\nDocs only; the suite passes at the head.\n\nNo open findings.\n\nReviewed `3333333`",
         "author": { "username": "octo-author" },
         "system": false,
         "resolvable": false,

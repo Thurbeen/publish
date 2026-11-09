@@ -64,7 +64,7 @@
           "nodes": [
             {
               "author": { "login": "octo-author" },
-              "body": "<!-- thurview-pr-review {\"head\":\"1111111111111111111111111111111111111111\",\"state\":\"active\",\"seen\":\"0\"} -->\nNext: @octo-author — fix the blocking finding.\n\n**Confidence 2/5:** The retry loop never stops on a 4xx.\n\n| Open findings | blocking | non-blocking | nit |\n| --- | --- | --- | --- |\n| Bug | 1 | 0 | 0 |\n\nReviewed `1111111` · [Full review](https://github.com/owner/repo/pull/7) · [Markdown export](https://github.com/owner/repo/pull/7/files)",
+              "body": "<!-- thurview-pr-review {\"head\":\"1111111111111111111111111111111111111111\",\"state\":\"active\",\"seen\":\"0\"} -->\nNext: @octo-author — **Confidence 2/5 · do not merge; fix the 1 blocking finding.**\n\nThe retry loop never stops on a 4xx.\n\n| Open findings | blocking | non-blocking | nit |\n| --- | --- | --- | --- |\n| Bug | 1 | 0 | 0 |\n\nReviewed `1111111` · [Full review](https://github.com/owner/repo/pull/7) · [Markdown export](https://github.com/owner/repo/pull/7/files)",
               "url": "https://github.com/owner/repo/pull/7#issuecomment-1"
             },
             {

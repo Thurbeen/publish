@@ -43,61 +43,6 @@ state and the wrong result (a crash, wrong value, leak, dropped write):
 
 No scenario, no finding: drop it or find the scenario.
 
-## thurview
-
-[thurview](https://www.npmjs.com/package/thurview) builds a code graph at both
-commits: callers of a changed symbol, tests that reach it, exported signatures
-that moved - what passes 2 and 6 need and a diff does not show. It is optional
-and **never a requirement**: without it the review below is the whole review and
-can pass on its own.
-
-**Detect it** before the first round. Either the CLI or an installed `thurview` or `review-fix` skill
-counts:
-
-```sh
-command -v thurview                  # the CLI on PATH
-npx --no-install thurview --version  # a copy npx already has, without downloading one
-```
-
-**Update it** before it reviews anything:
-
-```sh
-npm view thurview version   # latest published
-thurview --version          # installed
-thurview update             # upgrade in place
-npm i -g thurview@latest    # when installed with npm
-```
-
-Update the skill with `npx skills@latest update thurview review-fix --global --yes`.
-
-**Offline**, or the update fails because it cannot reach the registry: use the
-installed version and say so in the Testing section - the version that ran and
-that it was not checked against the registry. An unchecked version is never
-reported as current.
-
-**Run it** over the reviewed range, pinned to that version, so the command in the final report names the
-reviewer and version:
-
-```sh
-npx --yes thurview@<version> graph impact     --base <base_sha> --head <head_sha>
-npx --yes thurview@<version> graph interfaces --base <base_sha> --head <head_sha>
-npx --yes thurview@<version> graph callers <name> --base <base_sha> --head <head_sha>
-```
-
-- `impact.reach`: unchanged code calling something changed. Read each call site
-  against the new behaviour.
-- `reach[].tested: false` and `impact.untested`: paths nothing tests.
-- `interfaces` rows `changed` or `removed`: run `graph callers` on each; for a
-  removed one, ask the base graph.
-- `unresolved` and `truncated`: what the graph could not see. A finding that
-  rests on "no callers" states these numbers.
-
-Its rows are evidence. Each becomes a finding only with a failure scenario, and
-goes through the same rounds as the rest.
-
-**Not available at all** (no CLI or skill, or it cannot run): the built-in review, unchanged. Say
-in the Testing section that thurview did not run.
-
 ## The passes
 
 1. **Correctness.** Boundaries and off-by-one; empty, one, many; null, zero,
