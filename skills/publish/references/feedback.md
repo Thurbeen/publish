@@ -49,8 +49,8 @@ text, not the review.
 line `<!-- thurview-pr-review {"head":"<sha>","state":"active",...} -->` gives
 `head`, `current` (it read the current head) and `state` (`active`, `stopped`,
 `merged` or `closed`). The second line is the next action with the score:
-`Next: merge — **Confidence 5/5 · ...**`, `Next: ... fix the 1 blocking
-finding.**`, or `Review ended: ... · **Confidence N/5**`. Then comes `No open
+`Next: merge — **Confidence 5/5 · ...**`, a `Next:` line naming the fix, or
+`Review ended: ... · **Confidence N/5**`. Then comes `No open
 findings.` or a findings table. Each finding is an inline thread whose first
 comment carries
 `<!-- thurview-finding {"id":"<id>","category":"...","severity":"..."} -->`; the
