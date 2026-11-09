@@ -27,8 +27,8 @@
 
 ## Testing
 
-<!-- What was run in this session and what it printed: review rounds, the
-     reviewer and its version, findings and fixes, gate steps and commands,
+<!-- What was run in this session and what it printed: review rounds,
+     findings and fixes, gate steps and commands,
      what the documentation step updated, how CI ended, and how many
      maintainer threads were answered.
 

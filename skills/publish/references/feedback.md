@@ -47,12 +47,15 @@ text, not the review.
 
 **thurview-pr-review** keeps one summary comment, edited on each push. Its first
 line `<!-- thurview-pr-review {"head":"<sha>","state":"active",...} -->` gives
-`head`, `current` (it read the current head) and `state`. Then come the next
-action (`Next: merge`, `Next: ... fix the blocking finding`, or `Review ended:
-...`), `Confidence N/5`, and `No open findings.` or a findings table. Each
-finding is an inline thread whose first comment carries
+`head`, `current` (it read the current head) and `state` (`active`, `stopped`,
+`merged` or `closed`). The second line is the next action with the score:
+`Next: merge — **Confidence 5/5 · ...**`, a `Next:` line naming the fix, or
+`Review ended: ... · **Confidence N/5**`. Then comes `No open
+findings.` or a findings table. Each finding is an inline thread whose first
+comment carries
 `<!-- thurview-finding {"id":"<id>","category":"...","severity":"..."} -->`; the
-id is stable across pushes.
+id is stable across pushes. Each pass also sets the `thurview/review` commit
+status on the head it reviewed: its review check.
 
 Settled: `current`, `state` `active`, **Confidence 5/5** and **No open
 findings.** Anything else is open even with no unresolved threads; its `Next:`
@@ -87,8 +90,8 @@ answers it. A point raised again in a new thread is the same point.
 
 From a last read of the ledger at the reported head:
 
-- **thurview**: score and reviewed head, and whether that is the reported head;
-  or that it never posted.
+- **thurview**: score, reviewed head and `thurview/review` status, and whether
+  that is the reported head; or that it never posted.
 - **Greptile**: score, reviewed head and `Greptile Review` check state; or that
   it never posted.
 - **Threads**: resolved after a fix, answered and resolved without a change,

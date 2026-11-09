@@ -119,18 +119,13 @@ every finding, rounds until one is clean, capped at five. A review that ends
 `failed` stops the publish before the push. Most fixes come from this phase;
 give it the rounds it needs.
 
-**thurview**, when available, adds callers and tests the diff does not show. It
-is optional and never a requirement; the reference covers detection, updating
-and running it.
-
 **Infrastructure** - including infrastructure directories in a mixed
 repository - adds a conditional `infra-plan` step. Decide impact from the
 repository rules, the diff and the actual plan workflow; when affected, read
 [`references/infra-plan.md`](references/infra-plan.md) now to inventory scopes
 and arrange read-only preview evidence. Otherwise record `not-applicable`.
 
-Record rounds, findings raised and fixed, and - when thurview ran - its pinned
-command as the review step's `command`.
+Record rounds, findings raised and fixed.
 
 ## Phase 4 - gate
 
@@ -319,6 +314,6 @@ For infrastructure, re-verify the saved plan review at that head
 scopes and `infra-plan` status.
 
 Report the review state at that head from a last read of the ledger: thurview's
-score and reviewed head, Greptile's score, head and check, and threads resolved
+score, head and status, Greptile's score, head and check, and threads resolved
 after a fix, answered without one, and still open. A reviewer that never posted
 is reported as never posted, not as clean.
